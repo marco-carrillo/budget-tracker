@@ -1,6 +1,16 @@
-let transactions = [];
-let myChart;
+//*****************************************************/
+//  Functionality to make the budget application work */
+//*****************************************************/
+let transactions = [];      // Global variable with the transactions
+let myChart;                // Chart with the graph
+let db;                     // create a new db request for a "budget" database.
+const request = indexedDB.open("budget", 1);  // opens budget
+prepareOfflineScenario();   // Preparing local table in case offline
 
+//*****************************************************************************/
+//  Getting all transactions from the server, then saves the data on a global */
+//  variable and then provides the information to the user 
+//*****************************************************************************/
 fetch("/api/transaction")
   .then(response => {
     return response.json();
@@ -14,7 +24,68 @@ fetch("/api/transaction")
     populateChart();
   });
 
-function populateTotal() {
+
+//*********************************************************************************************/
+//  This function creates a local table (if it doesn't exist) and sets the proper             */
+//  environment so that transactions don't get lost b/c there is no connection to the server  */
+//*********************************************************************************************/
+
+function prepareOfflineScenario(){
+    
+    request.onupgradeneeded = function(event) {
+      // create object store called "pending" and set autoIncrement to true
+      const db = event.target.result;
+      db.createObjectStore("pending", { autoIncrement: true });
+    };
+    
+    request.onsuccess = function(event) {
+      db = event.target.result;
+    
+      // check if app is online before reading from db
+      if (navigator.onLine) {
+        checkDatabase();
+      }
+    };
+    
+    request.onerror = function(event) {
+      console.log("Woops! " + event.target.errorCode);
+    };
+}
+
+//***************************************************************************/
+//  Following function gets all of the records from the index db and then   */
+//  sends them to the server.  This function is called only after verifying */
+//  that there is connectivity.                                             */
+//***************************************************************************/
+function checkDatabase() {
+  const transaction = db.transaction(["pending"], "readwrite"); // open a transaction on your pending db
+  const store = transaction.objectStore("pending");             // access your pending object store
+  const getAll = store.getAll();                                // get all records from store and set to a variable
+
+  getAll.onsuccess = function() {
+    if (getAll.result.length > 0) {
+      fetch("/api/transaction/bulk", {
+        method: "POST",
+        body: JSON.stringify(getAll.result),
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.json())
+      .then(() => {
+        const transaction = db.transaction(["pending"], "readwrite");  // if successful, open a transaction on your pending db
+        const store = transaction.objectStore("pending");              // access your pending object store
+        store.clear();                                                 // clear all items in your store
+      });
+    }
+  };
+}
+
+//**********************************************************************/
+//  This function calculates the balance and updates it on the screen  */
+//**********************************************************************/
+  function populateTotal() {
   // reduce transaction amounts to a single total value
   let total = transactions.reduce((total, t) => {
     return total + parseInt(t.value);
@@ -24,6 +95,9 @@ function populateTotal() {
   totalEl.textContent = total;
 }
 
+//**************************************************************************************/
+//  This function takes data from the input boxes and appends an element to the table  */
+//**************************************************************************************/
 function populateTable() {
   let tbody = document.querySelector("#tbody");
   tbody.innerHTML = "";
@@ -40,6 +114,9 @@ function populateTable() {
   });
 }
 
+//***************************************************************************/
+//  This function takes the total transactions, and displays it on a graph  */
+//***************************************************************************/
 function populateChart() {
   // copy array and reverse it
   let reversed = transactions.slice().reverse();
@@ -78,6 +155,11 @@ function populateChart() {
   });
 }
 
+//*****************************************************************************/
+//  This function takes a new transaction entered by the user, creates a new  */
+//  data element, refreshes the screen (totals, graph, etc.) and then sends   */
+//  a POST transaction to the server to add this information to the database  */
+//*****************************************************************************/
 function sendTransaction(isAdding) {
   let nameEl = document.querySelector("#t-name");
   let amountEl = document.querySelector("#t-amount");
@@ -144,6 +226,25 @@ function sendTransaction(isAdding) {
   });
 }
 
+//******************************************************************************/
+//  The following function will be called to add a transaction to the indexed  */
+//  database.  This will happen when the POST API call fails (offline)         */
+//******************************************************************************/
+function saveRecord(record) {
+  // create a transaction on the pending db with readwrite access
+  const transaction = db.transaction(["pending"], "readwrite");
+
+  // access your pending object store
+  const store = transaction.objectStore("pending");
+
+  // add record to your store with add method.
+  store.add(record);
+}
+
+//*****************************************************************************/
+//  When the user clicks either the add funds or substract funds, that data   */
+//  will be sent to the server for permanent storage in databse.              */
+//*****************************************************************************/
 document.querySelector("#add-btn").onclick = function() {
   sendTransaction(true);
 };
@@ -151,3 +252,6 @@ document.querySelector("#add-btn").onclick = function() {
 document.querySelector("#sub-btn").onclick = function() {
   sendTransaction(false);
 };
+
+// listen for app coming back online
+window.addEventListener("online", checkDatabase);

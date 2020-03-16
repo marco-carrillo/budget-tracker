@@ -12,7 +12,7 @@ const FILES_TO_CACHE = [
     '/icons/icon-512x512.png'
 ];
   
-const CACHE_NAME = "static-cache-v2";
+const CACHE_NAME = "static-cache-v1"
 const DATA_CACHE_NAME = "data-cache-v1";
 
 //**********************************/
@@ -50,9 +50,11 @@ self.addEventListener("activate", event=> {
   });
   
 
-//*****************************************/
-//  Fetching data from cache if available */
-//*****************************************/
+//************************************************************************/
+//  Fetching data from cache if available, this function does two things */
+//  1) Updates the cache with api responses that are good (HTTP 200)     */
+//  2) Goes to the cache and retrieves requested object, if found        */
+//************************************************************************/
 self.addEventListener("fetch", event=> {
     if (event.request.url.includes("/api/")) {
       event.respondWith(
@@ -84,3 +86,5 @@ self.addEventListener("fetch", event=> {
       })
     );
   });
+
+
