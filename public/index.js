@@ -19,17 +19,25 @@ fetch("/api/transaction")
     // save db data on global variable
     transactions = data;
 
-    populateTotal();
-    populateTable();
-    populateChart();
-  });
+    //**********************************************************************************/
+    //  if online, then displays in UI.  If offline, then it calls a function          */
+    //  that checks for any temporary transactions, and if any, then adds to the list  */
+    //  of transactions and then displays in UI                                        */
+    //**********************************************************************************/
 
+    if (navigator.onLine) {   // If online, nothing to do here.
+      populateTotal();    // Adds the list of transactions to the total
+      populateTable();    // Adds the list of transaction to the table
+      populateChart();    // Adds the list of transactions to the chart
+    } else {
+      addOfflineItems();
+    }
+  });
 
 //*********************************************************************************************/
 //  This function creates a local table (if it doesn't exist) and sets the proper             */
 //  environment so that transactions don't get lost b/c there is no connection to the server  */
 //*********************************************************************************************/
-
 function prepareOfflineScenario(){
     
     request.onupgradeneeded = function(event) {
@@ -41,7 +49,12 @@ function prepareOfflineScenario(){
     request.onsuccess = function(event) {
       db = event.target.result;
     
-      // check if app is online before reading from db
+      //*******************************************************************************************/
+      // check if app is online before reading from db.  If it is, will send all stored data to   */
+      // permanent storage.  If it is off-line, it will check whether there are temporary records */
+      // If there are, that means they were created last session and need to be added to the      */
+      // transactions stored in permanent storage (which are displayed).                          */ 
+      //*******************************************************************************************/
       if (navigator.onLine) {
         checkDatabase();
       }
@@ -79,6 +92,30 @@ function checkDatabase() {
         store.clear();                                                 // clear all items in your store
       });
     }
+  };
+}
+
+//******************************************************************************/
+//  Following function checks if system is offline.  If it is, then searches   */
+//  for any transaction in indexedDB table and pushes it to the cached         */
+//  list of transactions so that they are included.                            */
+//******************************************************************************/
+function addOfflineItems() {
+
+  const transaction = db.transaction(["pending"], "readwrite"); // open a transaction on your pending db
+  const store = transaction.objectStore("pending");             // access your pending object store
+  const getAll = store.getAll();                                // get all records from store and set to a variable
+
+  getAll.onsuccess = function() {
+    if (getAll.result.length > 0) {
+        getAll.result.forEach(temp=>{
+            transactions.unshift(temp);
+        })
+    }
+    populateTotal();    // Adds the list of transactions to the total
+    populateTable();    // Adds the list of transaction to the table
+    populateChart();    // Adds the list of transactions to the chart
+
   };
 }
 
