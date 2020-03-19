@@ -92,6 +92,19 @@ self.addEventListener("fetch", event=> {
         });
       })
     );
+
+    //******************************************************************************************/
+    // After service job sets handler for fetching, it will fech the first API transactions    */
+    // we won't do anything with the data, but the SJ will cache it.  This is needed as        */
+    // index.js sometimes runs before SJ and therefore doesnt cache API responses, which leads */
+    // to a bad first customer experince.                                                      */
+    //******************************************************************************************/
+    fetch("/api/transaction")
+      .then(response => {
+         console.log('SJ requested api fetch to cache response');
+         return;
+       })
+
   });
 
 
