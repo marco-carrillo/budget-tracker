@@ -1,10 +1,12 @@
 //*****************************************************/
 //  Functionality to make the budget application work */
 //*****************************************************/
+console.log('I started');
 let transactions = [];      // Global variable with the transactions
 let myChart;                // Chart with the graph
 let db;                     // create a new db request for a "budget" database.
 const request = indexedDB.open("budget", 1);  // opens budget
+console.log('Preping offsline scenario');
 prepareOfflineScenario();   // Preparing local table in case offline
 
 //*****************************************************************************/
