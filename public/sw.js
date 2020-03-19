@@ -58,6 +58,7 @@ self.addEventListener("activate", event=> {
 //************************************************************************/
 self.addEventListener("fetch", event=> {
     console.log('1/5 Getting into fetch');
+    console.log(event.request.url);
     if (event.request.url.includes("/api/")) {
       console.log('2/5 confirm it is an api fetch request');
       event.respondWith(
