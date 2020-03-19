@@ -11,8 +11,10 @@ prepareOfflineScenario();   // Preparing local table in case offline
 //  Getting all transactions from the server, then saves the data on a global */
 //  variable and then provides the information to the user 
 //*****************************************************************************/
+console.log('client requesting first fetch');
 fetch("/api/transaction")
   .then(response => {
+    console.log('response is ',response);
     return response.json();
   })
   .then(data => {

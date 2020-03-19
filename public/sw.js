@@ -57,13 +57,19 @@ self.addEventListener("activate", event=> {
 //  2) Goes to the cache and retrieves requested object, if found        */
 //************************************************************************/
 self.addEventListener("fetch", event=> {
+    console.log('1/5 Getting into fetch');
     if (event.request.url.includes("/api/")) {
+      console.log('2/5 confirm it is an api fetch request');
       event.respondWith(
         caches.open(DATA_CACHE_NAME).then(cache => {
+          console.log('3/5 opening data cache');
+          console.log(event.request);
           return fetch(event.request)
             .then(response => {
+              console.log('4/5 fetched event.request');
               // If the response was good, clone it and store it in the cache.
               if (response.status === 200) {
+                console.log('5/4 response 200.  Cashing request');
                 cache.put(event.request.url, response.clone());
               }
   
