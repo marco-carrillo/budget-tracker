@@ -57,20 +57,13 @@ self.addEventListener("activate", event=> {
 //  2) Goes to the cache and retrieves requested object, if found        */
 //************************************************************************/
 self.addEventListener("fetch", event=> {
-    console.log('1/5 Getting into fetch');
-    console.log(event.request.url);
     if (event.request.url.includes("/api/")) {
-      console.log('2/5 confirm it is an api fetch request');
       event.respondWith(
         caches.open(DATA_CACHE_NAME).then(cache => {
-          console.log('3/5 opening data cache');
-          console.log(event.request);
           return fetch(event.request)
             .then(response => {
-              console.log('4/5 fetched event.request');
               // If the response was good, clone it and store it in the cache.
               if (response.status === 200) {
-                console.log('5/4 response 200.  Cashing request');
                 cache.put(event.request.url, response.clone());
               }
   
@@ -94,18 +87,19 @@ self.addEventListener("fetch", event=> {
       })
     );
 
-    //******************************************************************************************/
-    // After service job sets handler for fetching, it will fech the first API transactions    */
-    // we won't do anything with the data, but the SJ will cache it.  This is needed as        */
-    // index.js sometimes runs before SJ and therefore doesnt cache API responses, which leads */
-    // to a bad first customer experince.                                                      */
-    //******************************************************************************************/
-    fetch("/api/transaction")
-      .then(response => {
-         console.log('SJ requested api fetch to cache response');
-         return;
-       })
-
   });
 
+
+  //****************************************************************/
+  //  Creating the data cache with latest information from server  */
+  //****************************************************************/
+  console.log('Writing API cache');
+  fetch("/api/transaction")
+  .then(response=>{
+      if(response.status===200){
+      caches.open(DATA_CACHE_NAME).then(cache => {
+            cache.put(response.url, response.clone());
+      });
+    }
+    });
 

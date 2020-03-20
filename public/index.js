@@ -1,22 +1,18 @@
 //*****************************************************/
 //  Functionality to make the budget application work */
 //*****************************************************/
-console.log('I started');
 let transactions = [];      // Global variable with the transactions
 let myChart;                // Chart with the graph
 let db;                     // create a new db request for a "budget" database.
 const request = indexedDB.open("budget", 1);  // opens budget
-console.log('Preping offsline scenario');
 prepareOfflineScenario();   // Preparing local table in case offline
 
 //*****************************************************************************/
 //  Getting all transactions from the server, then saves the data on a global */
 //  variable and then provides the information to the user 
 //*****************************************************************************/
-console.log('client requesting first fetch');
 fetch("/api/transaction")
   .then(response => {
-    console.log('response is ',response);
     return response.json();
   })
   .then(data => {
