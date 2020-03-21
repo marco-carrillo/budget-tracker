@@ -1,17 +1,17 @@
 # Purpose of the application
 
-The client-side and server-side functionality has been provided, so that we can create the functionality needed so that the user can go offline and still be able to track expenses and have the application sync in with the server when the system goes online.
+The client-side and server-side functionality has been provided, so that we can create the functionality needed for the user to go offline and still be able to track expenses and have the application sync in with the server when the system goes back online.
 
-Overall, this application allows the user to keep a log of all income and expenses so that the user knows the net cash position at any point in time.
+Overall, this application allows the user to keep a log of all income and expenses to show the user the net cash position at any point in time (cash balance).
 
-Each time the user wants to record a transaction, the user will provide the name of the transaction, the amount and whether it is a deposit or a withdrawal.  A deposit will increase the net cash position (balance) and a withdrawal will decrease the net csh position.
+Each time the user wants to record a transaction, the user will provide the name of the transaction, the amount and whether it is a deposit or a withdrawal.  A deposit will increase the net cash position (balance) and a withdrawal will decrease it.
 
 
 ## Access and client application behavior
 
 Application has been deployed to https://budget-tracker-001.herokuapp.com/
 
-When the client application starts, the system will request all known transactions via the the api GET "/api/transaction".  That API will return all of the transactions.  The application will provide a list of the transactions and a graph showing the balance over time.  The application does it by calling three functions:  populateTotal, populateTable and populateChart.
+When the client application starts, the system will request from the server all known transactions via HTTP GET "/api/transaction".  That API will return all of the transactions, which will be taken by the broawer and will be displayed as both a table and a graph showing the balance over time.  The application does it by calling three functions:  populateTotal, populateTable and populateChart.
 
 ##  Adding offline capabilities 
 
