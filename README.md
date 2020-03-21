@@ -39,6 +39,10 @@ We made the following changes to the program.
 
 * Added functionality to the client, whenever a fetch transaction fails (server not online).  In that case, it will write a record in the temporary table.
 
+## Progressive Application
+
+This application can be installed as a progressive web application by any user that desires to do so.  In addition to installing a service worker, we have also installed a manifest.webmanifest that confirms to W3C working draft of March 19, 2020 (https://www.w3.org/TR/appmanifest/).
+
 
 ##  Server APIs
 
